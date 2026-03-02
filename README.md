@@ -36,12 +36,13 @@ source /home/${USER}/export-esp.sh
 ```
 
 ```
-cargo install espflash
-cargo install ldproxy
-cargo install cargo-generate
-cargo install cargo-espflash
+cargo install espflash --locked
+cargo install ldproxy --locked
+cargo install cargo-generate --locked
+cargo install cargo-espflash --locked
 ```
 
 ```
 cargo generate --git https://github.com/esp-rs/esp-idf-template cargo
 ```
+During the generation, the chip type will be asked choose ESP32S3 chip
