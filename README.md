@@ -20,7 +20,7 @@ install the following dependencies:
 pip install audio2numpy
 ```
 
-## install rust dependencies
+## install rust and ESP32 dependencies
 
 ```
 cargo install espup --locked 
@@ -46,3 +46,17 @@ cargo install cargo-espflash --locked
 cargo generate --git https://github.com/esp-rs/esp-idf-template cargo
 ```
 During the generation, the chip type will be asked choose ESP32S3 chip
+
+suprizingly, all what you need to do is to connect your esp32 to a usb port and run `cargo run` 
+
+you should see somthing like this in `lsusb` command output:
+```
+Bus 003 Device 020: ID 303a:1001 Espressif USB JTAG/serial debug unit
+```
+you might need to reset the device by long pressing the reset button 
+
+if you get error opening the serial port it is most likely permession problem run
+
+```
+sudo usermod -aG dialout $USER
+```
