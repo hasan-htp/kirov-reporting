@@ -60,3 +60,6 @@ if you get error opening the serial port it is most likely permession problem ru
 ```
 sudo usermod -aG dialout $USER
 ```
+
+
+https://docs.m5stack.com/en/core/Atom_EchoS3R
