@@ -4,6 +4,7 @@
 Debian:
 ```
 sudo apt-get install ffmpeg
+sudo apt-get install portaudio19-dev
 ```
 create python env:
 ```
@@ -18,6 +19,7 @@ install the following dependencies:
 
 ```
 pip install audio2numpy
+pip install sounddevice
 ```
 
 ## install rust and ESP32 dependencies
