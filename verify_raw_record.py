@@ -1,18 +1,23 @@
 import numpy as np
 import sounddevice as sd
 import os
+import sys
 
-SAMPLE_RATE = 16000
+SAMPLE_RATE = 48000
+CHANNELS = 2
 
+if len(sys.argv) < 2:
+    print(f"Usage: {sys.argv[0]} <raw_records_dir>")
+    sys.exit(1)
 
-for e in os.scandir("raw_records/"):
-    if e.is_file():
+raw_dir = sys.argv[1]
+
+for e in sorted(os.scandir(raw_dir), key=lambda x: x.name):
+    if e.is_file() and e.name.endswith(".raw"):
+        print(f"\nPlaying: {e.name}")
         with open(e.path, "rb") as f:
             data = f.read()
-            samples = np.frombuffer(data, dtype=np.int16)
-
-            print("Samples:", len(samples))
-            print("Duration:", len(samples)/SAMPLE_RATE, "seconds")
-
-            sd.play(samples, SAMPLE_RATE)
-            sd.wait()
+        samples = np.frombuffer(data, dtype=np.int16)
+        samples = samples.reshape(-1, CHANNELS)
+        sd.play(samples, SAMPLE_RATE)
+        sd.wait()
