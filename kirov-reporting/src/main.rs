@@ -27,7 +27,6 @@ fn es8311_init(i2c: &mut I2cDriver) -> Result<(), Box<dyn std::error::Error>> {
     // 0xC0 -> 0.5dB
     // 0xFF +32dB
 
-    println!("es8311_init");
     Ok(())
 }
 
@@ -114,7 +113,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         if BUTTON_PRESSED.load(Ordering::Relaxed) {
             BUTTON_PRESSED.store(false, Ordering::Relaxed);
-            println!("Kirov Reporting {}", count);
 
             play_record(SOUNDS[count], &mut i2s, &mut amp_enable)?;
 
