@@ -10,7 +10,6 @@ fn main() {
     paths.sort();
 
     for (i, path) in paths.iter().enumerate() {
-        println!("cargo:rustc-env=SOUND_{}={}", i, path.display());
+        println!("cargo:rustc-env=RECORD_{}={}", i, path.display());
     }
-    println!("cargo:rustc-env=SOUND_COUNT={}", paths.len());
 }

@@ -20,12 +20,13 @@ fn es8311_init(i2c: &mut I2cDriver) -> Result<(), Box<dyn std::error::Error>> {
     i2c.write(ES8311_ADDR,&[0x0D, 0x02],1000)?; // enable analog ADC and DAC, disable internal ref and normal vmid operation,
     i2c.write(ES8311_ADDR,&[0x12, 0x00],1000)?; // power up dac
     i2c.write(ES8311_ADDR,&[0x13, 0x10],1000)?; // enable output to HP drive
-    i2c.write(ES8311_ADDR,&[0x32, 0xBF],1000)?; // dac volume level (think about make it adjustable !)
+
 
     // -95.5dB to +32d in 0.5dB per step:
     // 0xBF -> 0dB
     // 0xC0 -> 0.5dB
     // 0xFF +32dB
+    i2c.write(ES8311_ADDR,&[0x32, 0xBF],1000)?; // dac volume level (think about make it adjustable !)
 
     Ok(())
 }
@@ -36,7 +37,7 @@ fn play_record(sound : &[u8], i2s :&mut I2sDriver<I2sTx>, amp_enable :&mut PinDr
     let mut offset: usize = 0;
 
     amp_enable.set_high()?;
-    std::thread::sleep(Duration::from_millis(200));
+    std::thread::sleep(Duration::from_millis(100));
     
     while offset < sound.len() {
         let end = (offset + CHUNK_SIZE).min(sound.len());
@@ -54,20 +55,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     esp_idf_svc::log::EspLogger::initialize_default();
 
 
-    const SOUNDS: &[&[u8]] = &[
-        include_bytes!(env!("SOUND_0")),
-        include_bytes!(env!("SOUND_1")),
-        include_bytes!(env!("SOUND_3")),
-        include_bytes!(env!("SOUND_4")),
-        include_bytes!(env!("SOUND_5")),
-        include_bytes!(env!("SOUND_6")),
-        include_bytes!(env!("SOUND_7")),
-        include_bytes!(env!("SOUND_8")),
-        include_bytes!(env!("SOUND_9")),
-        include_bytes!(env!("SOUND_10")),
+    const RECORDS: &[&[u8]] = &[
+        include_bytes!(env!("RECORD_0")),
+        include_bytes!(env!("RECORD_1")),
+        include_bytes!(env!("RECORD_3")),
+        include_bytes!(env!("RECORD_4")),
+        include_bytes!(env!("RECORD_5")),
+        include_bytes!(env!("RECORD_6")),
+        include_bytes!(env!("RECORD_7")),
+        include_bytes!(env!("RECORD_8")),
+        include_bytes!(env!("RECORD_9")),
+        include_bytes!(env!("RECORD_10")),
     ];
 
-    const MAX_COUNT: usize = SOUNDS.len();
+    const MAX_COUNT: usize = RECORDS.len();
 
     let peripherals = Peripherals::take().unwrap();
 
@@ -95,32 +96,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     i2s.tx_enable()?;
 
     // user button on Atom_EchoS3R is GPIO41, has a pull up resistor
-    let mut button = PinDriver::input(peripherals.pins.gpio41)?;
-    button.set_pull(Pull::Up)?;
-    button.set_interrupt_type(InterruptType::NegEdge)?;
+    let mut user_button = PinDriver::input(peripherals.pins.gpio41)?;
+    user_button.set_pull(Pull::Up)?;
+    user_button.set_interrupt_type(InterruptType::NegEdge)?;
 
-    let mut count: usize = 0;
     unsafe {
-        button.subscribe(|| {
+        user_button.subscribe(|| {
             BUTTON_PRESSED.store(true, Ordering::Relaxed);
         })?;
     }
 
-    button.enable_interrupt()?;
+    user_button.enable_interrupt()?;
 
-    play_record(SOUNDS[0], &mut i2s, &mut amp_enable)?;
+    play_record(RECORDS[0], &mut i2s, &mut amp_enable)?;
 
+    let mut count: usize = 0;
     loop {
         if BUTTON_PRESSED.load(Ordering::Relaxed) {
             BUTTON_PRESSED.store(false, Ordering::Relaxed);
 
-            play_record(SOUNDS[count], &mut i2s, &mut amp_enable)?;
+            play_record(RECORDS[count], &mut i2s, &mut amp_enable)?;
 
             count += 1;
             if count >= MAX_COUNT { 
                 count=0;
             }
-            button.enable_interrupt()?;
+            user_button.enable_interrupt()?;
         }
         std::thread::sleep(Duration::from_millis(10));
     }
